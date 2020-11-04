@@ -27,9 +27,6 @@ def get_first_folder_index(path):
     return DEFAULT_FIRST_DIRECTORY_NAME
 
 
-def get_files_to_move_list (path, directory_name, number):
-    pass
-
 def get_files_list(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 

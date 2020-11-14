@@ -55,12 +55,14 @@ def execute_script (path, number):
             number_of_files_to_move_in_folder = number
             print("Creating folder: ", path + str (folder_index))
 
-        # Moving
         for i in range(0, number_of_files_to_move_in_folder):
-            print("Moving file: ", path+files_to_move[i])
-            os.rename(path+files_to_move[i], path+str (folder_index)+"/"+files_to_move[i])
-            print("End filling folder: ", path + str (folder_index)+"/")
-            files_to_move.pop(i)
+            try:
+                print("Moving file: ", path+files_to_move[i])
+                os.rename(path+files_to_move[i], path+str (folder_index)+"/"+files_to_move[i])
+                print("End filling folder: ", path + str (folder_index)+"/")
+                files_to_move.pop(i)
+            except IndexError:
+                continue;
     print("Done")
 
 # Processing incoming arguments: path and file quantity
@@ -78,3 +80,5 @@ if quantity > 0 and source_dir != "":
     execute_script(source_dir, quantity)
 else:
     print("Wrong arguments. -d - directory, -q - file quantity")
+
+    # call example  python ./main.py -s ~/Img/Test/Not_Sorted/ -q 14

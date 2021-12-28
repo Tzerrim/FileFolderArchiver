@@ -1,9 +1,13 @@
 import argparse
 import os
 
-# Initialize variables
+
+# Initial variables from arguments
 source_dir = ""
 quantity = 0
+# global variables for selfcheck and statistics
+processed_quantity = 0
+folders_created = {}
 # Constants
 DEFAULT_FIRST_DIRECTORY_NAME = 0
 
@@ -48,21 +52,32 @@ def execute_script (path, number):
         files_in_destiantion = get_files_list(os.path.join(path, str (folder_index)))
         number_of_files_to_move_in_folder = number - len(files_in_destiantion)
 
-        # if in folder already are more files than we move per iteration
+        folders_created[folder_index] = []
+
+        # if in folder already have more files than we move per iteration
         if number_of_files_to_move_in_folder < 0:
             folder_index+=1
             os.mkdir(path + str (folder_index))
             number_of_files_to_move_in_folder = number
             print("Creating folder: ", path + str (folder_index))
 
-        for i in range(0, number_of_files_to_move_in_folder):
-            try:
-                print("Moving file: ", path+files_to_move[i])
-                os.rename(path+files_to_move[i], path+str (folder_index)+"/"+files_to_move[i])
-                print("End filling folder: ", path + str (folder_index)+"/")
-                files_to_move.pop(i)
-            except IndexError:
-                continue;
+        if len(files_to_move) < number_of_files_to_move_in_folder:
+            number_of_files_to_move_in_folder = len(files_to_move)
+
+        print("Files to move rest: ", len(files_to_move))
+        print("Files to move : ", number_of_files_to_move_in_folder)
+
+        iteration_files = files_to_move[0: number_of_files_to_move_in_folder]
+
+        for index, item in enumerate(iteration_files):
+            print("Moving file. Index: ", index, "From path: ", path + item, "To path: ",
+                  path + str(folder_index) + "/" + item)
+
+            os.rename(path + item, path + str(folder_index) + "/" + item)
+            folders_created[folder_index].append(item)
+
+        del files_to_move[0: number_of_files_to_move_in_folder]
+
     print("Done")
 
 # Processing incoming arguments: path and file quantity
@@ -79,6 +94,12 @@ quantity = args.quantity
 if quantity > 0 and source_dir != "":
     execute_script(source_dir, quantity)
 else:
-    print("Wrong arguments. -d - directory, -q - file quantity")
+    print("Wrong arguments. -s - directory, -q - file quantity")
 
+total = 0
+for x in folders_created:
+    total+=len(folders_created[x])
+    print( str(x) + " : " + str (len (folders_created[x])) )
+print("Total: " + str(total))
+# print(folders_created)
     # call example  python ./main.py -s ~/Img/Test/Not_Sorted/ -q 14

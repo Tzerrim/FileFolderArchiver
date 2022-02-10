@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
-# Initial variables from arguments
+# initial variables from arguments
 source_dir = ""
 quantity = 0
 verbose = False
@@ -88,7 +88,7 @@ def execute_script(path, number):
     logging.info("Done")
 
 
-# Processing incoming arguments: path and file quantity
+# processing incoming arguments: path, file quantity, verbosity flag
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-s', action="store", dest="source_dir", default="", help="Source dir")

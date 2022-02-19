@@ -1,6 +1,7 @@
 import argparse
 import os
 import logging
+import re
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
@@ -8,11 +9,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', date
 source_dir = ""
 quantity = 0
 verbose = False
+log_file = ""
 # global variables for selfcheck and statistics
 processed_quantity = 0
 folders_created = {}
 # Constants
 DEFAULT_FIRST_DIRECTORY_NAME = 0
+
+
+# REGEX_LOGFILE = "[^\\]*\.(\w+)$"
 
 
 def log(string):
@@ -80,7 +85,7 @@ def execute_script(path, number):
         iteration_files = files_to_move[0: number_of_files_to_move_in_folder]
 
         for index, item in enumerate(iteration_files):
-            log("Moving file. Index: " + str(index) + " From path: " + path + item + " To path: " + path + str(
+            log("Moving file. Index: " + str(index) + "\t" + path + item + " -> " + path + str(
                 folder_index) + "/" + item)
             os.rename(path + item, path + str(folder_index) + "/" + item)
             folders_created[folder_index].append(item)
@@ -96,14 +101,26 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-s', action="store", dest="source_dir", default="", help="Source dir")
 parser.add_argument('-q', action="store", dest="quantity", default="0", type=int, help="Number of files in folder")
 parser.add_argument('-v', action="store_true", dest="verbose", help="More verbose output")
+parser.add_argument('-l', action="store", dest="log_file_name", default="", help="Log file name. Format: NAME.log")
 
 args = parser.parse_args()
 
 source_dir = args.source_dir
 quantity = args.quantity
 verbose = args.verbose
+log_file = args.log_file_name
+
+# regex = re.compile(REGEX_LOGFILE)
 
 try:
+
+    if log_file:  # and regex.match(log_file)
+        logger = logging.getLogger()
+        handler = logging.FileHandler(log_file)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
     if quantity > 0 and source_dir != "":
         execute_script(source_dir, quantity)
     else:
@@ -114,8 +131,6 @@ try:
         total += len(folders_created[x])
         logging.info("Folder: " + str(x) + " : " + str(len(folders_created[x])))
     logging.info("Total: " + str(total))
-
-    print(folders_created)
 
 except FileNotFoundError:
     logging.error("No such file or directory")

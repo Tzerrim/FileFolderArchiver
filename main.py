@@ -49,12 +49,14 @@ def check_files_number_in_folder(path):
 
 def execute_script(path, number):
     files_to_move = get_files_list(path)
+    log("Number of files to move: " + str(len(files_to_move)))
     while len(files_to_move) > 0:
         folder_index = get_first_folder_index(path)
 
         # if folder does not exist
         if not os.path.isdir(path + "/" + str(folder_index)):
             os.mkdir(path + "/" + str(folder_index))
+            log("Creating folder: " + path + "/" + str(folder_index))
 
         files_to_move = get_files_list(path)
         files_in_destination = get_files_list(os.path.join(path, str(folder_index)))
@@ -72,14 +74,14 @@ def execute_script(path, number):
         if len(files_to_move) < number_of_files_to_move_in_folder:
             number_of_files_to_move_in_folder = len(files_to_move)
 
-        logging.info("Number of files rest: ", len(files_to_move))
-        logging.info("Number of files to move : ", number_of_files_to_move_in_folder)
+        log("Number of files rest: " + str(len(files_to_move)))
+        log("Number of files to move : " + str(number_of_files_to_move_in_folder))
 
         iteration_files = files_to_move[0: number_of_files_to_move_in_folder]
 
         for index, item in enumerate(iteration_files):
-            logging.info("Moving file. Index: ", index, "From path: ", path + item, "To path: ",
-                         path + str(folder_index) + "/" + item)
+            log("Moving file. Index: " + str(index) + " From path: " + path + item + " To path: " + path + str(
+                folder_index) + "/" + item)
             os.rename(path + item, path + str(folder_index) + "/" + item)
             folders_created[folder_index].append(item)
 
@@ -101,7 +103,6 @@ source_dir = args.source_dir
 quantity = args.quantity
 verbose = args.verbose
 
-
 try:
     if quantity > 0 and source_dir != "":
         execute_script(source_dir, quantity)
@@ -111,11 +112,16 @@ try:
     total = 0
     for x in folders_created:
         total += len(folders_created[x])
-        logging.info(str(x) + " : " + str(len(folders_created[x])))
+        logging.info("Folder: " + str(x) + " : " + str(len(folders_created[x])))
     logging.info("Total: " + str(total))
 
     print(folders_created)
 
 except FileNotFoundError:
     logging.error("No such file or directory")
+    logging.exception("message")
+except:
+    logging.error("Unexpected exception")
+    logging.exception("message")
+
 # call example  python ./main.py -s ~/Img/Test/Not_Sorted/ -q 14 -v

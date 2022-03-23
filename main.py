@@ -1,20 +1,21 @@
 import argparse
 import os
 import logging
-import re
+#import re
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 # initial variables from arguments
-source_dir = ""
+start_directory_number = 0
 quantity = 0
-verbose = False
+source_dir = ""
+destination_dir = ""
 log_file = ""
+verbose = False
 # global variables for selfcheck and statistics
 processed_quantity = 0
 folders_created = {}
 # Constants
-DEFAULT_FIRST_DIRECTORY_NAME = 0
 
 
 # REGEX_LOGFILE = "[^\\]*\.(\w+)$"
@@ -36,12 +37,12 @@ def get_subdirectories(path):
 
 def get_first_folder_index(path):
     subdirectories = get_subdirectories(path)
-    for i in range(0, len(subdirectories) + 1):
+    for i in range(start_directory_number, start_directory_number + len(subdirectories) + 1):
         if str(i) in subdirectories:
             continue
         else:
             return i
-    return DEFAULT_FIRST_DIRECTORY_NAME
+    return start_directory_number
 
 
 def get_files_list(path):
@@ -98,17 +99,21 @@ def execute_script(path, number):
 # processing incoming arguments: path, file quantity, verbosity flag
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-s', action="store", dest="source_dir", default="", help="Source dir")
+parser.add_argument('-s', action="store", dest="source_dir", default="", help="Source directory path")
 parser.add_argument('-q', action="store", dest="quantity", default="0", type=int, help="Number of files in folder")
 parser.add_argument('-v', action="store_true", dest="verbose", help="More verbose output")
 parser.add_argument('-l', action="store", dest="log_file_name", default="", help="Log file name. Format: NAME.log")
+parser.add_argument('-n', action="store", dest="start_directory_number", default="0", type=int, help="Folder number fron what count starts")
+parser.add_argument('-d', action="store", dest="destination_dir", default="", help="Destination directory path") # TODO make settable a destination folder
 
 args = parser.parse_args()
 
 source_dir = args.source_dir
+destination_dir = args.destination_dir
 quantity = args.quantity
 verbose = args.verbose
 log_file = args.log_file_name
+start_directory_number = args.start_directory_number
 
 # regex = re.compile(REGEX_LOGFILE)
 

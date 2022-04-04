@@ -1,7 +1,8 @@
 import argparse
 import os
 import logging
-#import re
+
+# import re
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
@@ -15,6 +16,8 @@ verbose = False
 # global variables for selfcheck and statistics
 processed_quantity = 0
 folders_created = {}
+
+
 # Constants
 
 
@@ -99,12 +102,15 @@ def execute_script(path, number):
 # processing incoming arguments: path, file quantity, verbosity flag
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-s', action="store", dest="source_dir", default="", help="Source directory path")
-parser.add_argument('-q', action="store", dest="quantity", default="0", type=int, help="Number of files in folder")
+parser.add_argument('-s', action="store", dest="source_dir", default="", required=True, help="Source directory path")
+parser.add_argument('-q', action="store", dest="quantity", default="100", type=int, required=True,
+                    help="Number of files in folder")
 parser.add_argument('-v', action="store_true", dest="verbose", help="More verbose output")
 parser.add_argument('-l', action="store", dest="log_file_name", default="", help="Log file name. Format: NAME.log")
-parser.add_argument('-n', action="store", dest="start_directory_number", default="0", type=int, help="Folder number fron what count starts")
-parser.add_argument('-d', action="store", dest="destination_dir", default="", help="Destination directory path") # TODO make settable a destination folder
+parser.add_argument('-n', action="store", dest="start_directory_number", default="0", type=int,
+                    help="Folder number from what count starts")
+parser.add_argument('-d', action="store", dest="destination_dir", default="",
+                    help="Destination directory path")  # TODO make settable a destination folder
 
 args = parser.parse_args()
 
@@ -125,6 +131,13 @@ try:
         formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%d-%b-%y %H:%M:%S')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+
+    logging.info("Source directory: " + str(source_dir))
+    logging.info("Destination directory: " + str(destination_dir if destination_dir else "NOT SETTED"))
+    logging.info("Files quantity pre directory" + str(quantity))
+    logging.info("Log file: " + str(log_file if log_file else "NOT SET"))
+    logging.info("Verbose mode: " + str("TRUE" if verbose else "FALSE"))
+    logging.info("Directory start count: " + str(start_directory_number if start_directory_number else "NOT SET"))
 
     if quantity > 0 and source_dir != "":
         execute_script(source_dir, quantity)

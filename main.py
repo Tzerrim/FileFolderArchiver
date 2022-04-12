@@ -19,9 +19,6 @@ log_dateformat = '%d-%b-%y %H:%M:%S'
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt=log_dateformat)
 
 
-# REGEX_LOGFILE = "[^\\]*\.(\w+)$"
-
-
 def log(string):
     if verbose:
         logging.info(string)
@@ -34,16 +31,6 @@ def get_subdirectories(path):
         if os.path.isdir(path + item):
             directories.append(item)
     return directories
-
-
-# def get_first_folder_index(path):
-#     subdirectories = get_subdirectories(path)
-#     for i in range(start_directory_number, start_directory_number + len(subdirectories) + 1):
-#         if str(i) in subdirectories and quantity <= check_files_number_in_folder( path + "/" + str(i)):
-#             continue
-#         else:
-#             return i
-#     return start_directory_number
 
 
 def prepare_directory_dict(path, number_of_files):
@@ -82,56 +69,12 @@ def get_files_quantity_in_folder(path):
 def execute_script():
     files_to_move = get_files_list(source_dir)
     log("Number of files to move: " + str(len(files_to_move)))
-    files_directory_dict = prepare_directory_dict(source_dir, len(files_to_move))
+    files_directory_dict = prepare_directory_dict(destination_dir, len(files_to_move))
     for directory in files_directory_dict:
         quantity_files_to_move = files_directory_dict[directory]
-        move_file(source_dir, source_dir + str(directory) + "/", files_to_move[0: quantity_files_to_move])
+        move_file(source_dir, destination_dir + str(directory) + "/", files_to_move[0: quantity_files_to_move])
         del files_to_move[0: quantity_files_to_move]
-
-
-#
-#
-# def execute_script(path, number):
-#     files_to_move = get_files_list(path)
-#     log("Number of files to move: " + str(len(files_to_move)))
-#     while len(files_to_move) > 0:
-#         folder_index = get_first_folder_index(path)
-#
-#         # if folder does not exist
-#         if not os.path.isdir(path + "/" + str(folder_index)):
-#             os.mkdir(path + "/" + str(folder_index))
-#             log("Creating folder: " + path + str(folder_index))
-#
-#         files_to_move = get_files_list(path)
-#         files_in_destination = get_files_list(os.path.join(path, str(folder_index)))
-#         number_of_files_to_move_in_folder = number - len(files_in_destination)
-#
-#         folders_created[folder_index] = []
-#
-#         # if in folder already have more files than we move per iteration
-#         if number_of_files_to_move_in_folder < 0:
-#             folder_index += 1
-#             os.mkdir(path + str(folder_index))
-#             number_of_files_to_move_in_folder = number
-#             logging.info("Creating folder: ", path + str(folder_index))
-#
-#         if len(files_to_move) < number_of_files_to_move_in_folder:
-#             number_of_files_to_move_in_folder = len(files_to_move)
-#
-#         log("Number of files rest: " + str(len(files_to_move)))
-#         log("Number of files to move : " + str(number_of_files_to_move_in_folder))
-#
-#         iteration_files = files_to_move[0: number_of_files_to_move_in_folder]
-#
-#         for index, item in enumerate(iteration_files):
-#             log("Moving file. Index: " + str(index) + "\t" + path + item + " -> " + path + str(
-#                 folder_index) + "/" + item)
-#             os.rename(path + item, path + str(folder_index) + "/" + item)
-#             folders_created[folder_index].append(item)
-#
-#         del files_to_move[0: number_of_files_to_move_in_folder]
-#
-#     logging.info("Done")
+    logging.info("Done")
 
 
 # processing incoming arguments: path, file quantity, verbosity flag
@@ -145,7 +88,7 @@ parser.add_argument('-l', action="store", dest="log_file_name", default="", help
 parser.add_argument('-n', action="store", dest="start_directory_number", default="0", type=int,
                     help="Folder number from what count starts")
 parser.add_argument('-d', action="store", dest="destination_dir", default="",
-                    help="Destination directory path")  # TODO make settable a destination folder
+                    help="Destination directory path")
 
 args = parser.parse_args()
 
@@ -155,8 +98,6 @@ quantity = args.quantity
 verbose = args.verbose
 log_file = args.log_file_name
 start_directory_number = args.start_directory_number
-
-# regex = re.compile(REGEX_LOGFILE)
 
 try:
 
@@ -169,10 +110,14 @@ try:
 
     logging.info("Source directory: " + str(source_dir))
     logging.info("Destination directory: " + str(destination_dir if destination_dir else "NOT SET"))
-    logging.info("Files quantity pre directory" + str(quantity))
+    logging.info("Files quantity per directory: " + str(quantity))
     logging.info("Log file: " + str(log_file if log_file else "NOT SET"))
     logging.info("Verbose mode: " + str("TRUE" if verbose else "FALSE"))
     logging.info("Directory start count: " + str(start_directory_number if start_directory_number else "NOT SET"))
+
+    if destination_dir is "":
+        logging.warning("Destination directory is not set. Source dir will be used as destination dir")
+        destination_dir = source_dir
 
     if quantity > 0 and source_dir != "":
         execute_script()

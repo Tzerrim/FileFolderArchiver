@@ -2,9 +2,8 @@ import argparse
 import logging
 import os
 
-# import re
-
 # initial variables from arguments
+total = 0
 start_directory_number = 0
 quantity = 0
 source_dir = ""
@@ -50,6 +49,7 @@ def prepare_directory_dict(path, number_of_files):
 def move_file(source_path, destination_path, files):
     if not os.path.isdir(destination_path):
         os.mkdir(destination_path)
+        folders_created[destination_path] = files
         log("Creating folder: " + destination_path)
     for index, item in enumerate(files):
         log("Moving file. Index: " + str(index) + "\t" + source_path + item + " -> " + destination_path + item)
@@ -68,13 +68,21 @@ def get_files_quantity_in_folder(path):
 
 def execute_script():
     files_to_move = get_files_list(source_dir)
-    log("Number of files to move: " + str(len(files_to_move)))
+    total = len(files_to_move)
+    log("Number of files to move: " + str(total))
     files_directory_dict = prepare_directory_dict(destination_dir, len(files_to_move))
     for directory in files_directory_dict:
         quantity_files_to_move = files_directory_dict[directory]
         move_file(source_dir, destination_dir + str(directory) + "/", files_to_move[0: quantity_files_to_move])
         del files_to_move[0: quantity_files_to_move]
     logging.info("Done")
+
+
+def validate_path(path):
+    if os.path.exists(path) and os.access(os.path.dirname(path), os.W_OK):
+        return True
+    else:
+        return False
 
 
 # processing incoming arguments: path, file quantity, verbosity flag
@@ -103,7 +111,7 @@ try:
 
     if log_file:  # and regex.match(log_file)
         logger = logging.getLogger()
-        handler = logging.FileHandler(log_file)
+        handler = logging.FileHandler(destination_dir+log_file)
         formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt=log_dateformat)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -115,14 +123,11 @@ try:
     logging.info("Verbose mode: " + str("TRUE" if verbose else "FALSE"))
     logging.info("Directory start count: " + str(start_directory_number if start_directory_number else "NOT SET"))
 
-    if destination_dir is "":
-        logging.warning("Destination directory is not set. Source dir will be used as destination dir")
+    if not destination_dir:
+        logging.warning("Destination directory is not set. Source directory will be used as destination directory")
         destination_dir = source_dir
 
-    if quantity > 0 and source_dir != "":
-        execute_script()
-    else:
-        logging.error("Wrong arguments. -s - directory, -q - file quantity")
+    execute_script()
 
     total = 0
     for x in folders_created:
